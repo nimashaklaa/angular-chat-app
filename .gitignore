@@ -1,0 +1,21 @@
+# .NET
+API/bin/
+API/obj/
+*.dll
+*.pdb
+*.exe
+
+# Angular
+client/node_modules/
+client/dist/
+client/.angular/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
