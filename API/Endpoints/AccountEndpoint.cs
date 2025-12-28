@@ -30,7 +30,7 @@ public static class AccountEndpoint
                 return Results.BadRequest(Response<string>.Fail(result.Errors.Select(e => e.Description).FirstOrDefault() ?? "User creation failed"));
             }
             return Results.Ok(Response<string>.Success("","Register Endpoint"));
-        }).WithName("Register").WithOpenApi();  
+        }).WithName("Register");  
 
         return group;
     }
