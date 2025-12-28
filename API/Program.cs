@@ -41,8 +41,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+//middleware
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapAccountEndpoints();
 
 app.Run();

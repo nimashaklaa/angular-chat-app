@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="common\" />
     <Folder Include="Data\" />
+    <Folder Include="Endpoints\" />
   </ItemGroup>
 
 </Project>
