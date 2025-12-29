@@ -8,6 +8,13 @@ API/obj/
 *.db-shm
 *.db-wal
 
+# User Uploads
+API/wwwroot/
+
+# Environment Variables
+API/.env
+.env
+
 # Angular
 client/node_modules/
 client/dist/
