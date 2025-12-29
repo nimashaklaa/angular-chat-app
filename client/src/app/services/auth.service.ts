@@ -31,13 +31,25 @@ export class AuthService {
     }));
   }
   profile():Observable<ApiResponse<User>>{
-    return this.httpClient.get<ApiResponse<User>>(`${this.baseUrl}/profile`)
+    return this.httpClient.get<ApiResponse<User>>(`${this.baseUrl}/profile`, {
+      headers: {
+        Authorization: `Bearer ${this.getExistingToken}`
+      }
+    })
     .pipe(tap(response => {
       if(response.isSuccess){
         localStorage.setItem('user', JSON.stringify(response.data));
       }
       return response;
     }));
+  }
+
+  get getExistingToken(): string | null {
+    return localStorage.getItem(this.token) || '';
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.getExistingToken;
   }
 
 }
