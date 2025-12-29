@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { AuthServiceService } from '../services/auth-service.service';
+import { AuthService } from '../services/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ApiResponse } from '../Models/api-response';
@@ -19,7 +19,7 @@ export class LoginComponent {
   email!: string;
   password!: string;
 
-  private authService = inject(AuthServiceService);
+  private authService = inject(AuthService);
   private snakeBar = inject(MatSnackBar);
   private router = inject(Router);
 
@@ -33,6 +33,7 @@ export class LoginComponent {
   login() {
     this.authService.login({email: this.email, password: this.password}).subscribe({
       next: () => {
+        this.authService.profile().subscribe();
         this.snakeBar.open('Login Successful', 'Close', {duration: 3000});
       },
       error: (error:HttpErrorResponse) => {

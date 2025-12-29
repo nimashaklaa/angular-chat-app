@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { AuthServiceService } from '../services/auth-service.service';
+import { AuthService } from '../services/auth.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +24,7 @@ export class RegisterComponent {
   profilePicture: string = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
   profileImage: File |null = null;
 
-  authService = inject(AuthServiceService);
+  authService = inject(AuthService);
   snakeBar = inject(MatSnackBar);
   router =inject(Router);
 
