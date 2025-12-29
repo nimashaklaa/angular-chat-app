@@ -20,6 +20,7 @@
     <Folder Include="common\" />
     <Folder Include="Data\" />
     <Folder Include="Endpoints\" />
+    <Folder Include="Services/" />
   </ItemGroup>
 
 </Project>
