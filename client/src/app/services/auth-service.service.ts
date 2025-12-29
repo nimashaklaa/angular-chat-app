@@ -10,7 +10,7 @@ export class AuthServiceService {
 
   private baseUrl = 'http://localhost:5001/api/account';
 
-  httpClient = inject(HttpClient);
+  private httpClient = inject(HttpClient);
 
   register(data:FormData):Observable<ApiResponse<string>>{
     return this.httpClient.post<ApiResponse<string>>(`${this.baseUrl}/register`, data)
