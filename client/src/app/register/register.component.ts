@@ -20,6 +20,7 @@ export class RegisterComponent {
   email!: string;
   password!: string;
   fullName!: string;
+  username!: string;
   profilePicture: string = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
   profileImage: File |null = null;
 
@@ -48,11 +49,12 @@ export class RegisterComponent {
   }
   register() {
     let formData = new FormData();
-    formData.append('email', this.email);
-    formData.append('password', this.password);
-    formData.append('fullName', this.fullName);
+    formData.append('Email', this.email);
+    formData.append('Password', this.password);
+    formData.append('FullName', this.fullName);
+    formData.append('UserName', this.username);
     if (this.profileImage) {
-      formData.append('profilePicture', this.profileImage);
+      formData.append('ProfileImage', this.profileImage);
     }
 
     this.authService.register(formData).subscribe({
