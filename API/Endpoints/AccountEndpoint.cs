@@ -1,9 +1,11 @@
 using System;
 using API.common;
 using API.DTOs;
+using API.Extensions;
 using API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Endpoints;
 
@@ -63,6 +65,14 @@ public static class AccountEndpoint
             return Results.Ok(Response<string>.Success(token,"Login Successful"));
             
         }).WithName("Login").DisableAntiforgery();
+
+        group.MapGet("/profile", async(UserManager<AppUser> userManager, HttpContext httpContext) =>
+        {
+            var currentLoggedInUserId = httpContext.User.GetUserId()!;
+            var user = await userManager.Users.SingleOrDefaultAsync(x => x.Id == currentLoggedInUserId.ToString());
+        
+            return Results.Ok(Response<AppUser>.Success(user!,"User profile fetched successfully"));
+        }).WithName("Profile").RequireAuthorization();
 
         return group;
     }
