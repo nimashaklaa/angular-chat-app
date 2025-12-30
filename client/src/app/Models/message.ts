@@ -3,6 +3,6 @@ export interface Message {
   senderId: string | null;
   receiverId: string | null;
   content: string | null;
-  createdDate: string;
+  timestamp: string;
   isRead: boolean;
 }

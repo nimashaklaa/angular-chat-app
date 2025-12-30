@@ -73,4 +73,10 @@ export class ChatService {
     );
     return onlineUser?.isOnline ? 'online' : this.currentOpenedChat()!.userName;
   }
+
+  loadMessages(pageNumber:number){
+    this.hubConnection?.invoke("LoadMessages", this.currentOpenedChat()?.id, pageNumber).then().catch().finally(()=>{
+      this.isLoading.update(()=> false)
+    })
+  }
 }

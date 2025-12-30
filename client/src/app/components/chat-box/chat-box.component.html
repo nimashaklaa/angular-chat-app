@@ -32,7 +32,7 @@
               {{ item.content }}
             </span>
             <span class="text-right text-gray-400 text-[10px] block mt-1">
-              {{ item.createdDate | date: 'short' }}
+              {{ item.timestamp | date: 'short' }}
             </span>
           </div>
         </div>
@@ -43,7 +43,7 @@
               {{ item.content }}
             </span>
             <span class="text-right text-gray-200 text-xs block mt-1">
-              {{ item.createdDate | date: 'short' }}
+              {{ item.timestamp | date: 'short' }}
             </span>
           </div>
           <div
@@ -57,6 +57,18 @@
           </div>
         </div>
       }
-    }
+    }@empty {
+        <div class="flex flex-col items-center justify-center h-full">
+            @if(chatService.isLoading()){
+                <mat-spinner diameter="40" strokeWidth="3"></mat-spinner>
+
+            }@else {
+                <mat-icon class="text-gray-400 chat-icon">chat</mat-icon>
+                <h6 class="text-center text-gray-500">
+                    No messages yet
+                </h6>
+            }
+        </div>
+      }
   </div>
 </div>
