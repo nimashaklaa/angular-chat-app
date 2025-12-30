@@ -4,7 +4,7 @@
       <img
         class="h-10 w-10 rounded-full border-gray-100 border-2 object-cover"
         [src]="
-          authService.currentLoggedInUser!.profilePicture ||
+          authService.currentLoggedInUser!.profileImage ||
           'https://randomuser.me//api/portraits/men/1.jpg'
         "
         alt="User Avatar"
