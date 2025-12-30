@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { ApiResponse } from '../Models/api-response';
 import { Observable, tap } from 'rxjs';
 import { User } from '../Models/user';
@@ -10,6 +10,7 @@ import { User } from '../Models/user';
 export class AuthService {
   private baseUrl = 'http://localhost:5001/api/account';
   private token = 'token';
+  isLoading = signal(false);
 
   private httpClient = inject(HttpClient);
 

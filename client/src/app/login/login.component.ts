@@ -19,7 +19,7 @@ export class LoginComponent {
   email!: string;
   password!: string;
 
-  private authService = inject(AuthService);
+  authService = inject(AuthService);
   private snakeBar = inject(MatSnackBar);
   private router = inject(Router);
 
@@ -31,17 +31,21 @@ export class LoginComponent {
   }
 
   login() {
+    this.authService.isLoading.set(true);
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: () => {
         this.authService.profile().subscribe();
         this.snakeBar.open('Login Successful', 'Close', { duration: 3000 });
+        this.authService.isLoading.set(false);
       },
       error: (error: HttpErrorResponse) => {
         let err = error.error as ApiResponse<string>;
         this.snakeBar.open(`Registration failed: ${err.error}`, 'Close', { duration: 3000 });
+        this.authService.isLoading.set(false);
       },
       complete: () => {
         this.router.navigate(['/']);
+        this.authService.isLoading.set(false);
       },
     });
   }

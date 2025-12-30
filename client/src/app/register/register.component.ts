@@ -9,6 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ApiResponse } from '../Models/api-response';
 import { Router, RouterLink } from '@angular/router';
+import { ButtonComponent } from '../components/button/button.component';
 
 @Component({
   selector: 'app-register',
@@ -19,6 +20,7 @@ import { Router, RouterLink } from '@angular/router';
     MatButtonModule,
     MatIconModule,
     RouterLink,
+    ButtonComponent,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
@@ -55,6 +57,7 @@ export class RegisterComponent {
     }
   }
   register() {
+    this.authService.isLoading.set(true);
     let formData = new FormData();
     formData.append('Email', this.email);
     formData.append('Password', this.password);
@@ -66,14 +69,21 @@ export class RegisterComponent {
 
     this.authService.register(formData).subscribe({
       next: () => {
-        this.snakeBar.open('Registration successful:', 'Close');
+        this.snakeBar.open('Registration successful:', 'Close', {
+          duration: 500,
+        });
+        this.authService.isLoading.set(false);
       },
       error: (error: HttpErrorResponse) => {
         let err = error.error as ApiResponse<string>;
-        this.snakeBar.open(`Registration failed: ${err.error}`, 'Close');
+        this.snakeBar.open(`Registration failed: ${err.error}`, 'Close', {
+          duration: 500,
+        });
+        this.authService.isLoading.set(false);
       },
       complete: () => {
         this.router.navigate(['/']);
+        this.authService.isLoading.set(false);
       },
     });
   }
