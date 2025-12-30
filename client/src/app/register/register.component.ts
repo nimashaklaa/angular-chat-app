@@ -12,25 +12,26 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
-  imports: [MatFormFieldModule, FormsModule, MatInputModule, MatButtonModule,MatIconModule],
+  imports: [MatFormFieldModule, FormsModule, MatInputModule, MatButtonModule, MatIconModule],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  styleUrl: './register.component.css',
 })
 export class RegisterComponent {
   email!: string;
   password!: string;
   fullName!: string;
   username!: string;
-  profilePicture: string = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
-  profileImage: File |null = null;
+  profilePicture: string =
+    'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+  profileImage: File | null = null;
 
   authService = inject(AuthService);
   snakeBar = inject(MatSnackBar);
-  router =inject(Router);
+  router = inject(Router);
 
   hide = signal(false);
 
-  togglePassword(event:MouseEvent) {
+  togglePassword(event: MouseEvent) {
     this.hide.set(!this.hide());
   }
   onFileSelected(event: any) {
@@ -44,7 +45,6 @@ export class RegisterComponent {
       };
       reader.readAsDataURL(file);
       console.log(this.profileImage);
-      
     }
   }
   register() {
@@ -61,14 +61,13 @@ export class RegisterComponent {
       next: () => {
         this.snakeBar.open('Registration successful:', 'Close');
       },
-      error: (error:HttpErrorResponse) => {
-        let err= error.error as ApiResponse<string>;
+      error: (error: HttpErrorResponse) => {
+        let err = error.error as ApiResponse<string>;
         this.snakeBar.open(`Registration failed: ${err.error}`, 'Close');
       },
       complete: () => {
         this.router.navigate(['/']);
-      }
+      },
     });
   }
-
 }

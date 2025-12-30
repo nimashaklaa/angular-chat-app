@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-chat-sidebar',
-  imports: [],
+  imports: [MatIcon, MatMenuModule],
   templateUrl: './chat-sidebar.component.html',
-  styles: ``
+  styles: ``,
 })
-export class ChatSidebarComponent {
-
-}
+export class ChatSidebarComponent {}

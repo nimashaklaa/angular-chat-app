@@ -6,8 +6,6 @@ import { ChatWindowComponent } from '../components/chat-window/chat-window.compo
   selector: 'app-chat',
   imports: [ChatSidebarComponent, ChatWindowComponent],
   templateUrl: './chat.component.html',
-  styleUrl: './chat.component.css'
+  styleUrl: './chat.component.css',
 })
-export class ChatComponent {
-
-}
+export class ChatComponent {}

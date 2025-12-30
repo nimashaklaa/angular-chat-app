@@ -12,10 +12,9 @@ import { Router } from '@angular/router';
   selector: 'app-login',
   imports: [MatInputModule, MatIconModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
 })
 export class LoginComponent {
-
   email!: string;
   password!: string;
 
@@ -25,25 +24,24 @@ export class LoginComponent {
 
   hide = signal(false);
 
-  togglePassword(event:MouseEvent) {
+  togglePassword(event: MouseEvent) {
     this.hide.set(!this.hide());
     event.stopPropagation();
   }
 
   login() {
-    this.authService.login({email: this.email, password: this.password}).subscribe({
+    this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: () => {
         this.authService.profile().subscribe();
-        this.snakeBar.open('Login Successful', 'Close', {duration: 3000});
+        this.snakeBar.open('Login Successful', 'Close', { duration: 3000 });
       },
-      error: (error:HttpErrorResponse) => {
-        let err= error.error as ApiResponse<string>;
-        this.snakeBar.open(`Registration failed: ${err.error}`, 'Close', {duration: 3000});
+      error: (error: HttpErrorResponse) => {
+        let err = error.error as ApiResponse<string>;
+        this.snakeBar.open(`Registration failed: ${err.error}`, 'Close', { duration: 3000 });
       },
       complete: () => {
         this.router.navigate(['/']);
-      }
+      },
     });
   }
-
 }
