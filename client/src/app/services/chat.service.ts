@@ -145,10 +145,11 @@ export class ChatService {
       // Replace temporary message with real one if it exists
       this.chatMessages.update(messages => {
         const tempMessageIndex = messages.findIndex(
-          m => m.id < 0 &&
-               m.content === message.content &&
-               m.senderId === message.senderId &&
-               m.receiverId === message.receiverId
+          m =>
+            m.id < 0 &&
+            m.content === message.content &&
+            m.senderId === message.senderId &&
+            m.receiverId === message.receiverId
         );
 
         if (tempMessageIndex !== -1) {
@@ -245,9 +246,7 @@ export class ChatService {
       .catch(error => {
         console.log('error', error);
         // Remove temporary message on error
-        this.chatMessages.update(messages =>
-          messages.filter(m => m.id !== tempId)
-        );
+        this.chatMessages.update(messages => messages.filter(m => m.id !== tempId));
       });
   }
 
@@ -279,11 +278,14 @@ export class ChatService {
 
   // Call this method after user interacts with the app to enable autoplay
   enableNotificationSound() {
-    this.notificationAudio.play().then(() => {
-      this.notificationAudio.pause();
-      this.notificationAudio.currentTime = 0;
-    }).catch(() => {
-      // Failed to enable notification sound
-    });
+    this.notificationAudio
+      .play()
+      .then(() => {
+        this.notificationAudio.pause();
+        this.notificationAudio.currentTime = 0;
+      })
+      .catch(() => {
+        // Failed to enable notification sound
+      });
   }
 }

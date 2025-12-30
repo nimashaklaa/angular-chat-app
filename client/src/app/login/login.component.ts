@@ -7,10 +7,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ApiResponse } from '../Models/api-response';
 import { Router, RouterLink } from '@angular/router';
+import { ButtonComponent } from '../components/button/button.component';
 
 @Component({
   selector: 'app-login',
-  imports: [MatInputModule, MatIconModule, FormsModule, RouterLink],
+  imports: [MatInputModule, MatIconModule, FormsModule, RouterLink, ButtonComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })

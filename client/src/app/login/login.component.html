@@ -49,13 +49,7 @@
         }
       </mat-form-field>
 
-      <button
-        [disabled]="!userForm.valid"
-        type="submit"
-        class="w-full mb-5 bg-blue-900 text-white rounded-md p-2 disabled:opacity-30"
-      >
-        Login
-      </button>
+      <app-button [isDisabled]="!userForm.valid" />
       <p class="font-bold text-xs text-center pb-10">
         Don't have an account?<a class="text-blue-500" [routerLink]="'/register'"> Register </a>
       </p>
