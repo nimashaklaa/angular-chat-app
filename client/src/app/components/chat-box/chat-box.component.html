@@ -50,8 +50,8 @@
             class="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex-shrink-0"
           >
             <img
-              [src]="chatService.currentOpenedChat()?.profileImage"
-              [alt]="chatService.currentOpenedChat()?.fullName"
+              [src]="authService.currentLoggedInUser?.profileImage"
+              [alt]="authService.currentLoggedInUser?.fullName"
               class="rounded-full h-8 w-8"
             />
           </div>

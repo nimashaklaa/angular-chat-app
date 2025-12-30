@@ -1,6 +1,8 @@
 @if (chatService.currentOpenedChat()) {
-  <div class="relative w-full bg-[#dfe7f1] h-full">
-    <div class="chat-header flex justify-between items-center border-b w-full bg-white p-4">
+  <div class="relative w-full bg-[#dfe7f1] h-full flex flex-col">
+    <div
+      class="chat-header flex justify-between items-center border-b w-full bg-white p-4 flex-shrink-0"
+    >
       <div>
         <span class="font-bold leading-normal">
           {{ chatService.currentOpenedChat()?.fullName | titlecase }}
@@ -14,10 +16,10 @@
         <mat-icon class="cursor-pointer hover:text-red-500">video_call</mat-icon>
       </div>
     </div>
-    <div>
+    <div class="flex-1 overflow-hidden min-h-0">
       <app-chat-box />
     </div>
-    <div class="absolute flex items-center bottom-0 border-t w-full bg-white p-4">
+    <div class="flex items-center border-t w-full bg-white p-4 flex-shrink-0">
       <input
         type="text"
         [(ngModel)]="message"
