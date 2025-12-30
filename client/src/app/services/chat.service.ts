@@ -12,6 +12,13 @@ export class ChatService {
   private authService = inject(AuthService);
   private hubUrl = 'http://localhost:5001/hubs/chat';
 
+  constructor() {
+    // Preload audio on service initialization
+    this.notificationAudio = new Audio('/assets/notification.mp3');
+    this.notificationAudio.volume = 0.5;
+    this.notificationAudio.load();
+  }
+
   // A reactive list of users who are currently online. When this updates, Angular automatically updates the UI.
   onlineUsers = signal<User[]>([]);
 
@@ -28,8 +35,20 @@ export class ChatService {
   // The connection object to the SignalR server
   private hubConnection?: HubConnection;
 
+  // Preload notification audio
+  private notificationAudio: HTMLAudioElement;
+
   // Sends the token with every request (accessTokenFactory)
   startConnection(token: string, senderId?: string) {
+    if (this.hubConnection?.state === HubConnectionState.Connected) return;
+
+    if (this.hubConnection) {
+      this.hubConnection.off('ReceiveMessage');
+      this.hubConnection.off('RecieveMessageList');
+      this.hubConnection.off('OnlineUsers');
+      this.hubConnection.off('NotifyTypingToUser');
+      this.hubConnection.off('Notify');
+    }
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(`${this.hubUrl}?senderId=${senderId || ''}`, { accessTokenFactory: () => token })
       .withAutomaticReconnect()
@@ -41,12 +60,11 @@ export class ChatService {
     this.hubConnection
       .start()
       .then(() => {
-        console.log('Connection started');
         // Request notification permission when connection is established
         this.requestNotificationPermission();
       })
       .catch(error => {
-        console.log('Connection or login error', error);
+        console.error('Connection error:', error);
       });
   }
 
@@ -63,7 +81,6 @@ export class ChatService {
   private registerEventHandlers() {
     // Listen for user coming online
     this.hubConnection!.on('Notify', (user: User) => {
-      console.log('User came online:', user);
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('Active now 🟢', {
           body: `${user.fullName} is online now`,
@@ -74,7 +91,6 @@ export class ChatService {
 
     // Listen for online users list updates
     this.hubConnection!.on('OnlineUsers', (user: User[]) => {
-      console.log('Online users updated:', user);
       this.onlineUsers.update(() =>
         user.filter(u => u.userName !== this.authService.currentLoggedInUser!.userName)
       );
@@ -102,16 +118,49 @@ export class ChatService {
     });
 
     // Listen for message list (history)
-    this.hubConnection!.on('RecieveMessageList', message => {
-      this.chatMessages.update(messages => [...message, ...messages]);
+    this.hubConnection!.on('RecieveMessageList', (newMessages: Message[]) => {
+      this.chatMessages.update(existingMessages => {
+        // Get existing message IDs
+        const existingIds = new Set(existingMessages.map(m => m.id));
+
+        // Filter out duplicates from new messages
+        const uniqueNewMessages = newMessages.filter(m => !existingIds.has(m.id));
+
+        // Prepend unique new messages
+        return [...uniqueNewMessages, ...existingMessages];
+      });
+
       this.isLoading.update(() => false);
       this.isLoadingMore.update(() => false);
     });
 
-    // Listen for new incoming messages
-    this.hubConnection!.on('ReceiveNewMessage', (message: Message) => {
-      document.title = '(1) New Message';
-      this.chatMessages.update(messages => [...messages, message]);
+    // Listen for new incoming messages (event name must match backend: "ReceiveMessage")
+    this.hubConnection!.on('ReceiveMessage', (message: Message) => {
+      // Only play sound and update title if message is from someone else
+      if (message.senderId !== this.authService.currentLoggedInUser?.id) {
+        this.playNotificationSound();
+        document.title = '(1) New Message';
+      }
+
+      // Replace temporary message with real one if it exists
+      this.chatMessages.update(messages => {
+        const tempMessageIndex = messages.findIndex(
+          m => m.id < 0 &&
+               m.content === message.content &&
+               m.senderId === message.senderId &&
+               m.receiverId === message.receiverId
+        );
+
+        if (tempMessageIndex !== -1) {
+          // Replace temp message with real one
+          const updated = [...messages];
+          updated[tempMessageIndex] = message;
+          return updated;
+        } else {
+          // No temp message found, just add the new message
+          return [...messages, message];
+        }
+      });
     });
   }
 
@@ -167,6 +216,12 @@ export class ChatService {
   }
 
   sendMessage(message: string) {
+    // Enable notification sound on first user interaction
+    this.enableNotificationSound();
+
+    // Generate a temporary negative ID for optimistic update
+    const tempId = -Date.now();
+
     this.chatMessages.update(messages => [
       ...messages,
       {
@@ -175,25 +230,60 @@ export class ChatService {
         receiverId: this.currentOpenedChat()!.id,
         timestamp: new Date().toString(),
         isRead: false,
-        id: 0,
+        id: tempId, // Temporary ID (negative)
       },
     ]);
+
     this.hubConnection
       ?.invoke('SendMessage', {
         receiverId: this.currentOpenedChat()?.id,
         content: message,
       })
-      .then(message => {
-        console.log('message', message);
+      .then(() => {
+        // Temp message will be replaced by ReceiveNewMessage handler
       })
       .catch(error => {
         console.log('error', error);
+        // Remove temporary message on error
+        this.chatMessages.update(messages =>
+          messages.filter(m => m.id !== tempId)
+        );
       });
   }
 
   notifyTyping() {
     this.hubConnection!.invoke('NotifyTyping', this.currentOpenedChat()?.userName)
-      .then(x => console.log('notify for', x))
-      .catch(error => console.log(error));
+      .then(() => {
+        // Typing notification sent successfully
+      })
+      .catch(error => console.error('Error sending typing notification:', error));
+  }
+
+  private playNotificationSound() {
+    try {
+      // Reset audio to start
+      this.notificationAudio.currentTime = 0;
+
+      // Attempt to play
+      const playPromise = this.notificationAudio.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.error('Could not play notification sound:', error.message);
+        });
+      }
+    } catch (error) {
+      console.error('Error playing notification audio:', error);
+    }
+  }
+
+  // Call this method after user interacts with the app to enable autoplay
+  enableNotificationSound() {
+    this.notificationAudio.play().then(() => {
+      this.notificationAudio.pause();
+      this.notificationAudio.currentTime = 0;
+    }).catch(() => {
+      // Failed to enable notification sound
+    });
   }
 }

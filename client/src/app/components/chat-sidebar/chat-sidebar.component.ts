@@ -33,5 +33,6 @@ export class ChatSidebarComponent implements OnInit {
     this.chatService.currentOpenedChat.set(user);
     this.chatService.resetChat(); // Clear messages and reset page number
     this.chatService.loadMessages(1);
+    this.chatService.enableNotificationSound(); // Enable sound on user interaction
   }
 }
