@@ -13,6 +13,8 @@ export class ChatService {
   // A reactive list of users who are currently online. When this updates, Angular automatically updates the UI.
   onlineUsers = signal<User[]>([]);
 
+  currentOpenedChat = signal<User |null>(null)
+
   // The connection object to the SignalR server
   private hubConnection?: HubConnection;
 
