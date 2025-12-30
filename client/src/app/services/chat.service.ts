@@ -3,6 +3,7 @@ import { User } from '../Models/user';
 import { AuthService } from './auth.service';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { Message } from '../Models/message';
+import { M } from '@angular/cdk/keycodes';
 
 @Injectable({
   providedIn: 'root',
@@ -50,6 +51,11 @@ export class ChatService {
       this.chatMessages.update(messages => [...message, ...messages]);
       this.isLoading.update(() => false);
     });
+
+    this.hubConnection!.on('ReceiveNewMessage', (message: Message) => {
+      document.title = '(1) New Message';
+      this.chatMessages.update(messages => [...messages, message]);
+    });
   }
 
   disConnectConnection() {
@@ -74,9 +80,38 @@ export class ChatService {
     return onlineUser?.isOnline ? 'online' : this.currentOpenedChat()!.userName;
   }
 
-  loadMessages(pageNumber:number){
-    this.hubConnection?.invoke("LoadMessages", this.currentOpenedChat()?.id, pageNumber).then().catch().finally(()=>{
-      this.isLoading.update(()=> false)
-    })
+  loadMessages(pageNumber: number) {
+    this.hubConnection
+      ?.invoke('LoadMessages', this.currentOpenedChat()?.id, pageNumber)
+      .then()
+      .catch()
+      .finally(() => {
+        this.isLoading.update(() => false);
+      });
+  }
+
+  sendMessage(message: string) {
+    this.chatMessages.update(messages => [
+      ...messages,
+      {
+        content: message,
+        senderId: this.authService.currentLoggedInUser!.id,
+        receiverId: this.currentOpenedChat()!.id,
+        timestamp: new Date().toString(),
+        isRead: false,
+        id: 0,
+      },
+    ]);
+    this.hubConnection
+      ?.invoke('SendMessage', {
+        receiverId: this.currentOpenedChat()?.id,
+        content: message,
+      })
+      .then(message => {
+        console.log('message', message);
+      })
+      .catch(error => {
+        console.log('error', error);
+      });
   }
 }

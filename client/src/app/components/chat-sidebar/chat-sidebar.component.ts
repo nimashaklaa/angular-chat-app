@@ -30,6 +30,6 @@ export class ChatSidebarComponent implements OnInit {
 
   openChatWindow(user: User) {
     this.chatService.currentOpenedChat.set(user);
-    this.chatService.loadMessages(1)
+    this.chatService.loadMessages(1);
   }
 }

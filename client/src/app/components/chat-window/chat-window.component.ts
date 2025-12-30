@@ -15,5 +15,9 @@ export class ChatWindowComponent {
   chatService = inject(ChatService);
   message: string = '';
 
-  sendMessage() {}
+  sendMessage() {
+    if (!this.message) return;
+    this.chatService.sendMessage(this.message);
+    this.message = '';
+  }
 }
