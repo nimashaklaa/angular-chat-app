@@ -1,7 +1,8 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { BootstrapOptions, inject, Injectable, signal } from '@angular/core';
 import { User } from '../Models/user';
 import { AuthService } from './auth.service';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import { Message } from '../Models/message';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,10 @@ export class ChatService {
   onlineUsers = signal<User[]>([]);
 
   currentOpenedChat = signal<User | null>(null);
+
+  chatMessages  = signal<Message[]>([])
+
+  isLoading = signal<boolean>(true)
 
   // The connection object to the SignalR server
   private hubConnection?: HubConnection;
@@ -40,6 +45,11 @@ export class ChatService {
         user.filter(user => user.userName !== this.authService.currentLoggedInUser!.userName)
       );
     });
+
+    this.hubConnection!.on('RecieveMessageList',(message)=>{
+      this.chatMessages.update(messages=> [...message, ...messages])
+      this.isLoading.update(()=>false)
+    })
   }
 
   disConnectConnection() {
