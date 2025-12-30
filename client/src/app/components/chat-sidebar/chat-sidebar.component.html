@@ -3,19 +3,22 @@
     <div class="flex items-center">
       <img
         class="h-10 w-10 rounded-full border-gray-100 border-2 object-cover"
-        src="https://randomuser.me/api/portraits/men/1.jpg"
+        [src]="
+          authService.currentLoggedInUser!.profilePicture ||
+          'https://randomuser.me//api/portraits/men/1.jpg'
+        "
         alt="User Avatar"
       />
-      <div class="font-medium ml-2 text-gray-500">Nishara Senadheera</div>
+      <div class="font-medium ml-2 text-gray-500">
+        {{ authService.currentLoggedInUser?.fullName | titlecase }}
+      </div>
     </div>
     <div>
       <button mat-icon-button [matMenuTriggerFor]="menu">
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
-        <button 
-        (click)="logout()"
-        mat-menu-item>
+        <button (click)="logout()" mat-menu-item>
           <mat-icon>logout</mat-icon>
           <span>Logout</span>
         </button>
