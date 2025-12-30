@@ -57,7 +57,12 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem(this.token)
-    localStorage.removeItem('user')
+    localStorage.removeItem(this.token);
+    localStorage.removeItem('user');
+  }
+
+  get currentLoggedInUser(): User | null {
+    const user: User = JSON.parse(localStorage.getItem('user') || '{}');
+    return user;
   }
 }
