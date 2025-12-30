@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild, ElementRef, AfterViewChecked, effect } from '@angular/core';
 import { ChatService } from '../../services/chat.service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { AuthService } from '../../services/auth.service';
@@ -45,7 +45,41 @@ import { MatIconModule } from '@angular/material/icon';
     `,
   ],
 })
-export class ChatBoxComponent {
+export class ChatBoxComponent implements AfterViewChecked {
   chatService = inject(ChatService);
   authService = inject(AuthService);
+
+  @ViewChild('chatContainer') private chatContainer?: ElementRef;
+  private shouldScroll = true;
+
+  constructor() {
+    // Watch for message changes and enable auto-scroll
+    effect(() => {
+      // React to messages signal changes
+      this.chatService.chatMessages();
+      this.shouldScroll = true;
+    });
+  }
+
+  ngAfterViewChecked() {
+    if (this.shouldScroll) {
+      this.scrollToBottom();
+      this.shouldScroll = false;
+    }
+  }
+
+  private scrollToBottom(): void {
+    try {
+      if (this.chatContainer) {
+        this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+      }
+    } catch (err) {
+      console.error('Scroll to bottom error:', err);
+    }
+  }
+
+  loadMoreMessage() {
+    this.shouldScroll = false; // Don't auto-scroll when loading more
+    this.chatService.loadMoreMessages();
+  }
 }

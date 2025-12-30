@@ -21,6 +21,10 @@ export class ChatService {
 
   isLoading = signal<boolean>(true);
 
+  isLoadingMore = signal<boolean>(false);
+
+  currentPage = signal<number>(1);
+
   // The connection object to the SignalR server
   private hubConnection?: HubConnection;
 
@@ -101,6 +105,7 @@ export class ChatService {
     this.hubConnection!.on('RecieveMessageList', message => {
       this.chatMessages.update(messages => [...message, ...messages]);
       this.isLoading.update(() => false);
+      this.isLoadingMore.update(() => false);
     });
 
     // Listen for new incoming messages
@@ -133,13 +138,32 @@ export class ChatService {
   }
 
   loadMessages(pageNumber: number) {
+    if (pageNumber === 1) {
+      this.isLoading.update(() => true);
+    } else {
+      this.isLoadingMore.update(() => true);
+    }
+    this.currentPage.set(pageNumber);
     this.hubConnection
       ?.invoke('LoadMessages', this.currentOpenedChat()?.id, pageNumber)
       .then()
       .catch()
       .finally(() => {
         this.isLoading.update(() => false);
+        this.isLoadingMore.update(() => false);
       });
+  }
+
+  loadMoreMessages() {
+    const nextPage = this.currentPage() + 1;
+    this.loadMessages(nextPage);
+  }
+
+  resetChat() {
+    this.chatMessages.set([]);
+    this.currentPage.set(1);
+    this.isLoading.set(true);
+    this.isLoadingMore.set(false);
   }
 
   sendMessage(message: string) {
@@ -167,10 +191,9 @@ export class ChatService {
       });
   }
 
-  notifyTyping(){
+  notifyTyping() {
     this.hubConnection!.invoke('NotifyTyping', this.currentOpenedChat()?.userName)
-    .then((x)=>console.log('notify for',x)
-    ).catch((error)=>console.log(error)
-    )
+      .then(x => console.log('notify for', x))
+      .catch(error => console.log(error));
   }
 }

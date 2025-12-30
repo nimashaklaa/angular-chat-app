@@ -31,6 +31,7 @@ export class ChatSidebarComponent implements OnInit {
 
   openChatWindow(user: User) {
     this.chatService.currentOpenedChat.set(user);
+    this.chatService.resetChat(); // Clear messages and reset page number
     this.chatService.loadMessages(1);
   }
 }
