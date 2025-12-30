@@ -34,17 +34,22 @@
     <mat-icon class="absolute text-gray-400 left-2 top-2 top-1 pr-3"> search </mat-icon>
   </div>
   <div class="py-1 overflow-y-auto scroll-smooth">
-    @for (item of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track item) {
+    @for (user of chatService.onlineUsers(); track user) {
       <div class="flex items-center gap-2 py-2">
-        <img
-          [src]="'https://randomuser.me/api/portraits/women/' + item + '.jpg'"
-          class="h-10 w-10 rounded-full"
-          alt=""
-        />
+        <img [src]="user.profileImage" class="h-10 w-10 rounded-full" alt="" />
         <div>
-          <span class="text-base text-gray-600 font-normal">Ama Hanz</span>
-          <p class="text-xs text-slate-400">3 new messages</p>
+          <span class="text-base text-gray-600 font-normal">{{ user!.fullName | titlecase }}</span>
+          <p class="text-xs text-slate-400">
+            {{ user.unreadMessagesCount ? user.unreadMessagesCount + 'new messages' : '' }}
+          </p>
         </div>
+        @if (user.isOnline) {
+          <div class="ml-auto font-medium text-xs">
+            <div class="bg-green-700 w-2 h-2 rounded-full"></div>
+          </div>
+        } @else {
+          <div class="bg-green-100 w-2 h-2 rounded-full"></div>
+        }
       </div>
     }
   </div>

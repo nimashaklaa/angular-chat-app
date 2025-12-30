@@ -75,7 +75,7 @@ builder.Services.AddAuthentication(opt =>
             // If the request is for our hub...
             var path = context.HttpContext.Request.Path;
             if (!string.IsNullOrEmpty(accessToken) &&
-                path.StartsWithSegments("/chathub"))
+                (path.StartsWithSegments("/hubs/chat") || path.StartsWithSegments("/hubs/chathub")))
             {
                 // Read the token out of the query string
                 context.Token = accessToken;
@@ -89,7 +89,19 @@ builder.Services.AddAuthentication(opt =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddAuthorization();
 builder.Services.AddOpenApi();
-builder.Services.AddSignalR();
+
+// Configure JSON serialization to use camelCase for Angular compatibility
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
+
+builder.Services.AddSignalR()
+    .AddJsonProtocol(options =>
+    {
+        options.PayloadSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
 var app = builder.Build();
 
@@ -112,7 +124,7 @@ app.UseAuthorization();
 
 app.UseStaticFiles();
 
-app.MapHub<ChatHub>("hubs/chathub");
+app.MapHub<ChatHub>("hubs/chat");
 
 app.MapAccountEndpoints();
 
