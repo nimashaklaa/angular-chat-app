@@ -85,19 +85,17 @@ export class ChatService {
           return user;
         })
       );
-      setTimeout(()=>{
-      this.onlineUsers.update((users)=>
-        users.map(user=>{
-          if(user.userName === senderUserName){
-            user.isTyping = false
-          }
-          return user 
-        })
-      )
-    },2000)
+      setTimeout(() => {
+        this.onlineUsers.update(users =>
+          users.map(user => {
+            if (user.userName === senderUserName) {
+              user.isTyping = false;
+            }
+            return user;
+          })
+        );
+      }, 2000);
     });
-
-    
 
     // Listen for message list (history)
     this.hubConnection!.on('RecieveMessageList', message => {
@@ -167,5 +165,12 @@ export class ChatService {
       .catch(error => {
         console.log('error', error);
       });
+  }
+
+  notifyTyping(){
+    this.hubConnection!.invoke('NotifyTyping', this.currentOpenedChat()?.userName)
+    .then((x)=>console.log('notify for',x)
+    ).catch((error)=>console.log(error)
+    )
   }
 }
