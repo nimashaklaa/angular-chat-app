@@ -55,4 +55,9 @@ export class AuthService {
   isLoggedIn(): boolean {
     return !!this.getExistingToken;
   }
+
+  logout() {
+    localStorage.removeItem(this.token)
+    localStorage.removeItem('user')
+  }
 }
