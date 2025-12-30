@@ -13,7 +13,7 @@ import { ChatService } from '../../services/chat.service';
   templateUrl: './chat-sidebar.component.html',
   styles: ``,
 })
-export class ChatSidebarComponent implements OnInit{
+export class ChatSidebarComponent implements OnInit {
   authService = inject(AuthService);
   router = inject(Router);
   chatService = inject(ChatService);
@@ -21,9 +21,10 @@ export class ChatSidebarComponent implements OnInit{
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
+    this.chatService.disConnectConnection();
   }
 
   ngOnInit(): void {
-    this.chatService.startConnection(this.authService.getExistingToken!)
+    this.chatService.startConnection(this.authService.getExistingToken!);
   }
 }

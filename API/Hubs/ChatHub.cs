@@ -35,7 +35,7 @@ public class ChatHub(UserManager<AppUser> userManager, AddDbContext context):Hub
             var user = new OnlineUserDto
             {
                 ConnectionId = connectionId,
-                Username = username,
+                UserName = username,
                 ProfileImage = currentUser!.ProfileImage,
                 FullName = currentUser.FullName,
             };
@@ -114,7 +114,7 @@ public class ChatHub(UserManager<AppUser> userManager, AddDbContext context):Hub
         {
             return;
         }
-        var connectionId = onlineUsers.Values.FirstOrDefault(u => u.Username == recipientUsername)?.ConnectionId;
+        var connectionId = onlineUsers.Values.FirstOrDefault(u => u.UserName == recipientUsername)?.ConnectionId;
         if (connectionId != null)
         {
             await Clients.Client(connectionId).SendAsync("NotifyTypingToUser", senderUsername);
@@ -135,7 +135,7 @@ public class ChatHub(UserManager<AppUser> userManager, AddDbContext context):Hub
         var users = await userManager.Users.Select(u=> new OnlineUserDto
         {
             Id = u.Id.ToString(),
-            Username = u.UserName,
+            UserName = u.UserName,
             FullName = u.FullName,
             ProfileImage = u.ProfileImage,
             IsOnline = onlineUsersSet.Contains(u.UserName!),
