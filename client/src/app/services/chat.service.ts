@@ -16,9 +16,9 @@ export class ChatService {
 
   currentOpenedChat = signal<User | null>(null);
 
-  chatMessages  = signal<Message[]>([])
+  chatMessages = signal<Message[]>([]);
 
-  isLoading = signal<boolean>(true)
+  isLoading = signal<boolean>(true);
 
   // The connection object to the SignalR server
   private hubConnection?: HubConnection;
@@ -46,10 +46,10 @@ export class ChatService {
       );
     });
 
-    this.hubConnection!.on('RecieveMessageList',(message)=>{
-      this.chatMessages.update(messages=> [...message, ...messages])
-      this.isLoading.update(()=>false)
-    })
+    this.hubConnection!.on('RecieveMessageList', message => {
+      this.chatMessages.update(messages => [...message, ...messages]);
+      this.isLoading.update(() => false);
+    });
   }
 
   disConnectConnection() {
