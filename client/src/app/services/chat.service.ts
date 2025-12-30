@@ -31,27 +31,58 @@ export class ChatService {
       .withAutomaticReconnect()
       .build();
 
+    // Register event handlers BEFORE starting connection
+    this.registerEventHandlers();
+
     this.hubConnection
       .start()
       .then(() => {
         console.log('Connection started');
+        // Request notification permission when connection is established
+        this.requestNotificationPermission();
       })
       .catch(error => {
         console.log('Connection or login error', error);
       });
+  }
 
+  private requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          console.log('Notification permission granted');
+        }
+      });
+    }
+  }
+
+  private registerEventHandlers() {
+    // Listen for user coming online
+    this.hubConnection!.on('Notify', (user: User) => {
+      console.log('User came online:', user);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Active now 🟢', {
+          body: `${user.fullName} is online now`,
+          icon: user.profileImage,
+        });
+      }
+    });
+
+    // Listen for online users list updates
     this.hubConnection!.on('OnlineUsers', (user: User[]) => {
-      console.log(user);
+      console.log('Online users updated:', user);
       this.onlineUsers.update(() =>
-        user.filter(user => user.userName !== this.authService.currentLoggedInUser!.userName)
+        user.filter(u => u.userName !== this.authService.currentLoggedInUser!.userName)
       );
     });
 
+    // Listen for message list (history)
     this.hubConnection!.on('RecieveMessageList', message => {
       this.chatMessages.update(messages => [...message, ...messages]);
       this.isLoading.update(() => false);
     });
 
+    // Listen for new incoming messages
     this.hubConnection!.on('ReceiveNewMessage', (message: Message) => {
       document.title = '(1) New Message';
       this.chatMessages.update(messages => [...messages, message]);
