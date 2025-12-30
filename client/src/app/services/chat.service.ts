@@ -76,6 +76,29 @@ export class ChatService {
       );
     });
 
+    this.hubConnection!.on('NotifyTypingToUser', senderUserName => {
+      this.onlineUsers.update(users =>
+        users.map(user => {
+          if (user.userName === senderUserName) {
+            user.isTyping = true;
+          }
+          return user;
+        })
+      );
+      setTimeout(()=>{
+      this.onlineUsers.update((users)=>
+        users.map(user=>{
+          if(user.userName === senderUserName){
+            user.isTyping = false
+          }
+          return user 
+        })
+      )
+    },2000)
+    });
+
+    
+
     // Listen for message list (history)
     this.hubConnection!.on('RecieveMessageList', message => {
       this.chatMessages.update(messages => [...message, ...messages]);
