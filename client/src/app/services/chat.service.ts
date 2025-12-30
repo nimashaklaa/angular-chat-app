@@ -13,7 +13,7 @@ export class ChatService {
   // A reactive list of users who are currently online. When this updates, Angular automatically updates the UI.
   onlineUsers = signal<User[]>([]);
 
-  currentOpenedChat = signal<User |null>(null)
+  currentOpenedChat = signal<User | null>(null);
 
   // The connection object to the SignalR server
   private hubConnection?: HubConnection;
@@ -46,5 +46,21 @@ export class ChatService {
     if (this.hubConnection?.state === HubConnectionState.Connected) {
       this.hubConnection.stop().catch(error => console.log(error));
     }
+  }
+
+  status(userName: string | undefined): string {
+    const currentChatUser = this.currentOpenedChat();
+    if (!currentChatUser) {
+      return 'offline';
+    }
+    const onlineUser = this.onlineUsers().find(user => user.userName === userName);
+    return onlineUser?.isTyping ? 'Typing ...' : this.isUserOnline();
+  }
+
+  isUserOnline(): string {
+    let onlineUser = this.onlineUsers().find(
+      user => user.userName === this.currentOpenedChat()?.userName
+    );
+    return onlineUser?.isOnline ? 'online' : this.currentOpenedChat()!.userName;
   }
 }
