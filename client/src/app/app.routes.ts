@@ -19,4 +19,12 @@ export const routes: Routes = [
         component: ChatComponent,
         canActivate: [authGuard]
     },
+    /* ** is a wildcard that matches any URL path not defined above
+    Catches all undefined/unmatched routes (404 pages)
+    */
+    {
+        path:'**',
+        redirectTo: '/chat',
+        pathMatch: 'full'
+    }
 ];
