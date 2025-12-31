@@ -75,6 +75,12 @@ export class VideoChatService {
       this.incomingCall = false;
     });
 
+    this.hubConnection.on('CallDeclined', () => {
+      // Handle call declined - update state
+      this.isCalllActive = false;
+      this.incomingCall = false;
+    });
+
     // Return the promise so we can await it
     return this.hubConnection.start()
       .then(() => {
@@ -134,5 +140,14 @@ export class VideoChatService {
     }
     this.hubConnection.invoke('EndCall', receiverId)
       .catch(err => console.error('Error ending call:', err));
+  }
+
+  sendDeclineCall(callerId: string) {
+    if (this.hubConnection?.state !== HubConnectionState.Connected) {
+      console.error('Cannot decline call: SignalR not connected');
+      return;
+    }
+    this.hubConnection.invoke('DeclineCall', callerId)
+      .catch(err => console.error('Error declining call:', err));
   }
 }

@@ -18,6 +18,10 @@
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
+        <button (click)="showCallHistory()" mat-menu-item>
+          <mat-icon>history</mat-icon>
+          <span>Call History</span>
+        </button>
         <button (click)="logout()" mat-menu-item>
           <mat-icon>logout</mat-icon>
           <span>Logout</span>

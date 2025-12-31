@@ -112,6 +112,11 @@ export class VideoChatComponent implements OnInit {
       this.handleRemoteCallEnd();
     });
 
+    this.signalRService.hubConnection.on('CallDeclined', () => {
+      // Handle when the other party declines the call
+      this.cleanupCall();
+    });
+
     this.signalRService.answerReceived.subscribe(async data => {
       if (data) {
         await this.peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
@@ -152,9 +157,9 @@ export class VideoChatComponent implements OnInit {
     // Store remoteUserId before clearing state
     const remoteUserId = this.signalRService.remoteUserId;
     
-    // Send end call signal before clearing state
+    // Send decline call signal before clearing state
     if (remoteUserId) {
-      this.signalRService.sendEndCall(remoteUserId);
+      this.signalRService.sendDeclineCall(remoteUserId);
     }
     
     // Clear state

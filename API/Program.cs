@@ -48,6 +48,7 @@ builder.Services.AddIdentityCore<AppUser>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<CallHistoryService>();
 
 builder.Services.AddAuthentication(opt =>
 {
@@ -134,5 +135,6 @@ app.MapHub<ChatHub>("hubs/chat");
 app.MapHub<VideoChatHub>("hubs/video");
 
 app.MapAccountEndpoints();
+app.MapCallHistoryEndpoints();
 
 app.Run();
