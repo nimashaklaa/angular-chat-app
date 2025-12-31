@@ -28,6 +28,7 @@ export class VideoChatService {
     senderId: string;
     candidate: RTCIceCandidate;
   } | null>(null);
+  public shouldStopRinging = new BehaviorSubject<boolean>(false);
 
   private authService = inject(AuthService);
 

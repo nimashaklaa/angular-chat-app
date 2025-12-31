@@ -23,6 +23,7 @@ export class AppComponent implements OnInit {
     if (!this.authService.getExistingToken) return;
     this.signalRService.startConnection();
     this.startOfferReceive();
+    this.setupRingingListener();
   }
 
   startOfferReceive() {
@@ -47,6 +48,15 @@ export class AppComponent implements OnInit {
 
         this.signalRService.remoteUserId = data.senderId;
         this.signalRService.incomingCall = true;
+      }
+    });
+  }
+
+  private setupRingingListener() {
+    this.signalRService.shouldStopRinging.subscribe(shouldStop => {
+      if (shouldStop) {
+        this.stopRinging();
+        this.signalRService.shouldStopRinging.next(false);
       }
     });
   }

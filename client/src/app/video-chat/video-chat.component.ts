@@ -78,7 +78,7 @@ export class VideoChatComponent implements OnInit {
 
   setupSignalListers() {
     this.signalRService.hubConnection.on('CallEnded', () => {
-      //task tod endCall()
+      this.handleRemoteCallEnd();
     });
 
     this.signalRService.answerReceived.subscribe(async data => {
@@ -95,23 +95,28 @@ export class VideoChatComponent implements OnInit {
   }
 
   declineCall() {
+    // Stop ringing tone
+    this.signalRService.shouldStopRinging.next(true);
+    // Send end call signal before clearing state
+    this.signalRService.sendEndCall(this.signalRService.remoteUserId);
     this.signalRService.incomingCall = false;
     this.signalRService.isCalllActive = false;
-    this.signalRService.sendEndCall(this.signalRService.remoteUserId);
     this.dialogRef.close();
   }
 
   async acceptCall() {
+    // Stop ringing tone
+    this.signalRService.shouldStopRinging.next(true);
     this.signalRService.incomingCall = false;
     this.signalRService.isCalllActive = true;
 
-    let offer = await this.signalRService.offerReceived.getValue()?.offer;
+    let offer = this.signalRService.offerReceived.getValue()?.offer;
     if (offer) {
       await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
 
       let answer = await this.peerConnection.createAnswer();
       await this.peerConnection.setLocalDescription(answer);
-      this.signalRService.sendAnswer(this.signalRService.remoteUserId, offer);
+      this.signalRService.sendAnswer(this.signalRService.remoteUserId, answer);
     }
   }
 
@@ -151,22 +156,32 @@ export class VideoChatComponent implements OnInit {
   }
 
   async endCall() {
+    // Send end call signal before clearing remoteUserId
+    this.signalRService.sendEndCall(this.signalRService.remoteUserId);
+
+    this.cleanupCall();
+  }
+
+  private cleanupCall() {
     if (this.peerConnection) {
-      this.dialogRef.close();
-      this.signalRService.isCalllActive = false;
-      this.signalRService.incomingCall = false;
-      this.signalRService.remoteUserId = '';
       this.peerConnection.close();
       this.peerConnection = new RTCPeerConnection();
-      this.localVideo.nativeElement.srcObject = null;
     }
-    const stream = this.localVideo.nativeElement.srcObject as MediaStream;
 
+    const stream = this.localVideo.nativeElement.srcObject as MediaStream;
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
       this.localVideo.nativeElement.srcObject = null;
     }
 
-    this.signalRService.sendEndCall(this.signalRService.remoteUserId);
+    this.signalRService.isCalllActive = false;
+    this.signalRService.incomingCall = false;
+    this.signalRService.remoteUserId = '';
+    this.dialogRef.close();
+  }
+
+  private handleRemoteCallEnd() {
+    // Clean up call without sending another end signal (to avoid infinite loop)
+    this.cleanupCall();
   }
 }
