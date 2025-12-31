@@ -69,7 +69,12 @@ export class VideoChatComponent implements OnInit {
   signalRService = inject(VideoChatService);
   private dialogRef: MatDialogRef<VideoChatComponent> = inject(MatDialogRef);
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.setupPeerConnection();
+    this.startLocalVideo();
+    this.signalRService.startConnection();
+    this.setupSignalListers();
+  }
 
   setupSignalListers() {
     this.signalRService.hubConnection.on('CallEnded', () => {

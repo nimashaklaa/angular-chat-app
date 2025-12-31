@@ -28,6 +28,8 @@ export class AppComponent implements OnInit {
   startOfferReceive() {
     this.signalRService.offerReceived.subscribe(async data => {
       if (data) {
+        let audio = new Audio('/assets/ringing-tone.mp3');
+        audio.play();
         this.dialog.open(VideoChatComponent, {
           width: '400px',
           height: '600px',

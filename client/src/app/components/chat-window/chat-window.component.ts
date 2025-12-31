@@ -4,6 +4,9 @@ import { TitleCasePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ChatBoxComponent } from '../chat-box/chat-box.component';
+import { VideoChatService } from '../../services/video-chat.service';
+import { MatDialog } from '@angular/material/dialog';
+import { VideoChatComponent } from '../../video-chat/video-chat.component';
 
 @Component({
   selector: 'app-chat-window',
@@ -12,12 +15,23 @@ import { ChatBoxComponent } from '../chat-box/chat-box.component';
   styles: ``,
 })
 export class ChatWindowComponent {
+  dialog = inject(MatDialog);
   chatService = inject(ChatService);
+  signalRService = inject(VideoChatService);
   message: string = '';
 
   sendMessage() {
     if (!this.message) return;
     this.chatService.sendMessage(this.message);
     this.message = '';
+  }
+  displayDialog(receiverId: string) {
+    this.signalRService.remoteUserId = receiverId;
+    this.dialog.open(VideoChatComponent, {
+      width: '400px',
+      height: '600px',
+      disableClose: true,
+      autoFocus: false,
+    });
   }
 }
