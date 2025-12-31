@@ -75,7 +75,9 @@ builder.Services.AddAuthentication(opt =>
             // If the request is for our hub...
             var path = context.HttpContext.Request.Path;
             if (!string.IsNullOrEmpty(accessToken) &&
-                (path.StartsWithSegments("/hubs/chat") || path.StartsWithSegments("/hubs/chathub")))
+                (path.StartsWithSegments("/hubs/chat") ||
+                 path.StartsWithSegments("/hubs/chathub") ||
+                 path.StartsWithSegments("/hubs/video")))
             {
                 // Read the token out of the query string
                 context.Token = accessToken;

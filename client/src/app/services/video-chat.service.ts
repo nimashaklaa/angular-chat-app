@@ -1,14 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { AuthService } from './auth.service';
 import { BehaviorSubject } from 'rxjs';
-import { J } from '@angular/cdk/keycodes';
 
 @Injectable({
   providedIn: 'root',
 })
 export class VideoChatService {
-  private hubUrl = 'http://localhost:5000/hubs/video';
+  private hubUrl = 'http://localhost:5001/hubs/video';
   public hubConnection!: HubConnection;
 
   public incomingCall = false;
@@ -50,24 +49,50 @@ export class VideoChatService {
       this.answerReceived.next({ senderId, answer: JSON.parse(answer) });
     });
 
-    this.hubConnection.on('ReceiveCandidate', (senderId, candidate) => {
+    this.hubConnection.on('ReceiveIceCandidate', (senderId, candidate) => {
       this.iceCandidateReceived.next({ senderId, candidate: JSON.parse(candidate) });
+    });
+
+    this.hubConnection.on('CallEnded', () => {
+      // Handle call ended
+      this.isCalllActive = false;
+      this.incomingCall = false;
     });
   }
 
   sendOffer(receiverId: string, offer: RTCSessionDescriptionInit) {
-    this.hubConnection.invoke('SendOffer', receiverId, JSON.stringify(offer));
+    if (this.hubConnection?.state !== HubConnectionState.Connected) {
+      console.error('Cannot send offer: SignalR not connected');
+      return;
+    }
+    this.hubConnection.invoke('SendOffer', receiverId, JSON.stringify(offer))
+      .catch(err => console.error('Error sending offer:', err));
   }
 
   sendAnswer(receiverId: string, answer: RTCSessionDescriptionInit) {
-    this.hubConnection.invoke('SendAnswer', receiverId, JSON.stringify(answer));
+    if (this.hubConnection?.state !== HubConnectionState.Connected) {
+      console.error('Cannot send answer: SignalR not connected');
+      return;
+    }
+    this.hubConnection.invoke('SendAnswer', receiverId, JSON.stringify(answer))
+      .catch(err => console.error('Error sending answer:', err));
   }
 
   sendIceCandidate(receiverId: string, candidate: RTCIceCandidate) {
-    this.hubConnection.invoke('SendIceCandidate', receiverId, JSON.stringify(candidate));
+    if (this.hubConnection?.state !== HubConnectionState.Connected) {
+      console.error('Cannot send ICE candidate: SignalR not connected');
+      return;
+    }
+    this.hubConnection.invoke('SendIceCandidate', receiverId, JSON.stringify(candidate))
+      .catch(err => console.error('Error sending ICE candidate:', err));
   }
 
   sendEndCall(receiverId: string) {
-    this.hubConnection.invoke('EndCall', receiverId);
+    if (this.hubConnection?.state !== HubConnectionState.Connected) {
+      console.error('Cannot end call: SignalR not connected');
+      return;
+    }
+    this.hubConnection.invoke('EndCall', receiverId)
+      .catch(err => console.error('Error ending call:', err));
   }
 }
