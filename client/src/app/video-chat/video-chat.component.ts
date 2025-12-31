@@ -22,24 +22,40 @@ import { MatDialogRef } from '@angular/material/dialog';
       ></video>
 
       <div class="absolute bottom-10 left-0 right-0 z-50 flex justify-center space-x-3 p-4">
-        <button
-          class="bg-green-500 flex items-center gap-2 hover:bg-gray-700 shadow-xl text-white font-bold py-2 px-4 rounded-full"
-        >
-          <mat-icon> call </mat-icon>
-          Accept
-        </button>
-        <button
-          class="bg-green-500 flex items-center gap-2 hover:bg-gray-700 shadow-xl text-white font-bold py-2 px-4 rounded-full"
-        >
-          <mat-icon> call_end </mat-icon>
-          Decline
-        </button>
-        <button
-          class="bg-green-500 flex items-center gap-2 hover:bg-gray-700 shadow-xl text-white font-bold py-2 px-4 rounded-full"
-        >
-          <mat-icon> call </mat-icon>
-          End Call
-        </button>
+        @if (signalRService.incomingCall) {
+          <button
+            class="bg-green-500 flex items-center gap-2 hover:bg-gray-700 shadow-xl text-white font-bold py-2 px-4 rounded-full"
+            (click)="acceptCall()"
+          >
+            <mat-icon> call </mat-icon>
+            Accept
+          </button>
+          <button
+            class="bg-red-500 flex items-center gap-2 hover:bg-gray-700 shadow-xl text-white font-bold py-2 px-4 rounded-full"
+            (click)="declineCall()"
+          >
+            <mat-icon> call_end </mat-icon>
+            Decline
+          </button>
+        }
+        @if (!signalRService.incomingCall && !signalRService.isCalllActive) {
+          <button
+            class="bg-green-500 flex items-center gap-2 hover:bg-gray-700 shadow-xl text-white font-bold py-2 px-4 rounded-full"
+            (click)="startCall()"
+          >
+            <mat-icon> call </mat-icon>
+            Start Call
+          </button>
+        }
+        @if (this.signalRService.incomingCall) {
+          <button
+            class="bg-red-500 flex items-center gap-2 hover:bg-red-900 shadow-xl text-white font-bold py-2 px-4 rounded-full"
+            (click)="endCall()"
+          >
+            <mat-icon> call_end </mat-icon>
+            End Call
+          </button>
+        }
       </div>
     </div>
   `,
