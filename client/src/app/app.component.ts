@@ -4,7 +4,6 @@ import { VideoChatService } from './services/video-chat.service';
 import { AuthService } from './services/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { VideoChatComponent } from './video-chat/video-chat.component';
-import { D } from '@angular/cdk/keycodes';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +17,7 @@ export class AppComponent implements OnInit {
   private signalRService = inject(VideoChatService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
+  private ringingAudio?: HTMLAudioElement;
 
   ngOnInit(): void {
     if (!this.authService.getExistingToken) return;
@@ -28,16 +28,34 @@ export class AppComponent implements OnInit {
   startOfferReceive() {
     this.signalRService.offerReceived.subscribe(async data => {
       if (data) {
-        let audio = new Audio('/assets/ringing-tone.mp3');
-        audio.play();
-        this.dialog.open(VideoChatComponent, {
+        // Play ringing tone
+        this.ringingAudio = new Audio('/assets/ringing-tone.mp3');
+        this.ringingAudio.loop = true; // Loop the ringing
+        this.ringingAudio.play();
+
+        // Open video chat dialog
+        const dialogRef = this.dialog.open(VideoChatComponent, {
           width: '400px',
           height: '600px',
           disableClose: false,
         });
+
+        // Stop ringing when dialog closes (call answered/declined/ended)
+        dialogRef.afterClosed().subscribe(() => {
+          this.stopRinging();
+        });
+
         this.signalRService.remoteUserId = data.senderId;
         this.signalRService.incomingCall = true;
       }
     });
+  }
+
+  private stopRinging() {
+    if (this.ringingAudio) {
+      this.ringingAudio.pause();
+      this.ringingAudio.currentTime = 0;
+      this.ringingAudio = undefined;
+    }
   }
 }
