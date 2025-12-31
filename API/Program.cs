@@ -99,7 +99,11 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
 
-builder.Services.AddSignalR()
+builder.Services.AddSignalR(options =>
+{
+    // Enable detailed error messages
+    options.EnableDetailedErrors = true;
+})
     .AddJsonProtocol(options =>
     {
         options.PayloadSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;

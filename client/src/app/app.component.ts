@@ -29,16 +29,39 @@ export class AppComponent implements OnInit {
   startOfferReceive() {
     this.signalRService.offerReceived.subscribe(async data => {
       if (data) {
-        // Play ringing tone
+        // Stop any existing ringing first
+        this.stopRinging();
+        
+        // Set call type from received offer
+        this.signalRService.callType = data.callType;
+        
+        // Prepare ringing tone (but don't play yet due to browser autoplay policy)
         this.ringingAudio = new Audio('/assets/ringing-tone.mp3');
-        this.ringingAudio.loop = true; // Loop the ringing
-        this.ringingAudio.play();
+        this.ringingAudio.loop = true;
+        this.ringingAudio.volume = 0.7;
+        
+        // Try to play, but handle autoplay policy gracefully
+        this.ringingAudio.play().catch(err => {
+          // Browser blocked autoplay - this is expected
+          // We'll try to play when user interacts with the dialog
+          console.log('Ringing tone will play when user interacts with the call dialog');
+        });
 
-        // Open video chat dialog
+        // Open video/voice chat dialog with appropriate size
         const dialogRef = this.dialog.open(VideoChatComponent, {
-          width: '400px',
-          height: '600px',
+          width: data.callType === 'video' ? '400px' : '350px',
+          height: data.callType === 'video' ? '600px' : '500px',
           disableClose: false,
+        });
+
+        // Try to play ringing when dialog opens (user interaction)
+        dialogRef.afterOpened().subscribe(() => {
+          if (this.ringingAudio && this.ringingAudio.paused) {
+            this.ringingAudio.play().catch(err => {
+              // Still blocked, will play when user clicks accept/decline
+              console.log('Ringing tone will play on button click');
+            });
+          }
         });
 
         // Stop ringing when dialog closes (call answered/declined/ended)
@@ -53,19 +76,27 @@ export class AppComponent implements OnInit {
   }
 
   private setupRingingListener() {
+    // Listen for stop ringing signal
     this.signalRService.shouldStopRinging.subscribe(shouldStop => {
       if (shouldStop) {
         this.stopRinging();
-        this.signalRService.shouldStopRinging.next(false);
       }
     });
   }
 
   private stopRinging() {
     if (this.ringingAudio) {
-      this.ringingAudio.pause();
-      this.ringingAudio.currentTime = 0;
-      this.ringingAudio = undefined;
+      try {
+        this.ringingAudio.pause();
+        this.ringingAudio.currentTime = 0;
+        this.ringingAudio.loop = false;
+        this.ringingAudio.src = ''; // Clear the source
+        this.ringingAudio.load(); // Reset the audio element
+      } catch (error) {
+        console.error('Error stopping ringing tone:', error);
+      } finally {
+        this.ringingAudio = undefined;
+      }
     }
   }
 }

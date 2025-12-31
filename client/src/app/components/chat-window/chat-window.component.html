@@ -12,11 +12,21 @@
           {{ chatService.status(chatService.currentOpenedChat()?.userName) }}
         </span>
       </div>
-      <div
-        class="cursor-pointer hover:text-blue-500"
-        (click)="displayDialog(chatService.currentOpenedChat()!.id)"
-      >
-        <mat-icon class="cursor-pointer hover:text-red-500">video_call</mat-icon>
+      <div class="flex items-center gap-2">
+        <div
+          class="cursor-pointer hover:text-blue-500"
+          (click)="displayDialog(chatService.currentOpenedChat()!.id, 'voice')"
+          title="Voice Call"
+        >
+          <mat-icon class="cursor-pointer hover:text-green-500">phone</mat-icon>
+        </div>
+        <div
+          class="cursor-pointer hover:text-blue-500"
+          (click)="displayDialog(chatService.currentOpenedChat()!.id, 'video')"
+          title="Video Call"
+        >
+          <mat-icon class="cursor-pointer hover:text-red-500">video_call</mat-icon>
+        </div>
       </div>
     </div>
     <div class="flex-1 overflow-hidden min-h-0">

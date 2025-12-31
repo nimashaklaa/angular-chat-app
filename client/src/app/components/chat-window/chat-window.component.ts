@@ -25,11 +25,12 @@ export class ChatWindowComponent {
     this.chatService.sendMessage(this.message);
     this.message = '';
   }
-  displayDialog(receiverId: string) {
+  displayDialog(receiverId: string, callType: 'video' | 'voice' = 'video') {
     this.signalRService.remoteUserId = receiverId;
+    this.signalRService.callType = callType;
     this.dialog.open(VideoChatComponent, {
-      width: '400px',
-      height: '600px',
+      width: callType === 'video' ? '400px' : '350px',
+      height: callType === 'video' ? '600px' : '500px',
       disableClose: true,
       autoFocus: false,
     });

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { AuthService } from './auth.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -13,12 +13,14 @@ export class VideoChatService {
   public incomingCall = false;
   public isCalllActive = false;
   public remoteUserId = '';
+  public callType: 'video' | 'voice' = 'video';
 
   public peerConnection!: RTCPeerConnection;
 
   public offerReceived = new BehaviorSubject<{
     senderId: string;
     offer: RTCSessionDescriptionInit;
+    callType: 'video' | 'voice';
   } | null>(null);
   public answerReceived = new BehaviorSubject<{
     senderId: string;
@@ -28,11 +30,24 @@ export class VideoChatService {
     senderId: string;
     candidate: RTCIceCandidate;
   } | null>(null);
-  public shouldStopRinging = new BehaviorSubject<boolean>(false);
+  public shouldStopRinging = new Subject<boolean>();
 
   private authService = inject(AuthService);
 
   startConnection() {
+    // If connection already exists and is connected, don't recreate it
+    if (this.hubConnection?.state === HubConnectionState.Connected) {
+      return Promise.resolve();
+    }
+
+    // If connection exists but is not connected, remove old handlers and start fresh
+    if (this.hubConnection) {
+      this.hubConnection.off('ReceiveOffer');
+      this.hubConnection.off('ReceiveAnswer');
+      this.hubConnection.off('ReceiveIceCandidate');
+      this.hubConnection.off('CallEnded');
+    }
+
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(this.hubUrl, {
         accessTokenFactory: () => this.authService.getExistingToken!,
@@ -40,10 +55,10 @@ export class VideoChatService {
       .withAutomaticReconnect()
       .build();
 
-    this.hubConnection.start().catch(err => console.error('SignalRConnectionError', err));
-
-    this.hubConnection.on('ReceiveOffer', (senderId, offer) => {
-      this.offerReceived.next({ senderId, offer: JSON.parse(offer) });
+    // Register event handlers BEFORE starting connection
+    this.hubConnection.on('ReceiveOffer', (senderId, offer, callType = 'video') => {
+      console.log('[VideoChatService] ReceiveOffer received - SenderId:', senderId, 'CallType:', callType);
+      this.offerReceived.next({ senderId, offer: JSON.parse(offer), callType: callType as 'video' | 'voice' });
     });
 
     this.hubConnection.on('ReceiveAnswer', (senderId, answer) => {
@@ -59,14 +74,38 @@ export class VideoChatService {
       this.isCalllActive = false;
       this.incomingCall = false;
     });
+
+    // Return the promise so we can await it
+    return this.hubConnection.start()
+      .then(() => {
+        console.log('[VideoChatService] SignalR connection established - ConnectionId:', this.hubConnection.connectionId);
+      })
+      .catch(err => {
+        console.error('[VideoChatService] SignalRConnectionError', err);
+        throw err;
+      });
   }
 
-  sendOffer(receiverId: string, offer: RTCSessionDescriptionInit) {
+  async sendOffer(receiverId: string, offer: RTCSessionDescriptionInit, callType: 'video' | 'voice' = 'video') {
+    // Ensure connection is ready
     if (this.hubConnection?.state !== HubConnectionState.Connected) {
-      console.error('Cannot send offer: SignalR not connected');
+      console.log('SignalR not connected, waiting for connection...');
+      try {
+        await this.startConnection();
+      } catch (error) {
+        console.error('Failed to start SignalR connection:', error);
+        return;
+      }
+    }
+
+    if (!receiverId) {
+      console.error('Cannot send offer: receiverId is empty');
       return;
     }
-    this.hubConnection.invoke('SendOffer', receiverId, JSON.stringify(offer))
+
+    console.log('Sending offer to receiverId:', receiverId, 'callType:', callType);
+    this.hubConnection.invoke('SendOffer', receiverId, JSON.stringify(offer), callType)
+      .then(() => console.log('Offer sent successfully'))
       .catch(err => console.error('Error sending offer:', err));
   }
 
