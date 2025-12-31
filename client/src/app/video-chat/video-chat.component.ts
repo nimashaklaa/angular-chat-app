@@ -47,7 +47,7 @@ import { MatDialogRef } from '@angular/material/dialog';
             Start Call
           </button>
         }
-        @if (this.signalRService.incomingCall) {
+        @if (this.signalRService.isCalllActive) {
           <button
             class="bg-red-500 flex items-center gap-2 hover:bg-red-900 shadow-xl text-white font-bold py-2 px-4 rounded-full"
             (click)="endCall()"
